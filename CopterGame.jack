@@ -1,0 +1,116 @@
+class CopterGame {
+    field Copter copter;
+    field Obstacle obstacle;
+    field int score;
+
+    constructor CopterGame new() {
+        let copter = Copter.new(50, 100, 20);
+        // Start safe (inside screen)
+        let obstacle = Obstacle.new(480, 50);
+        let score = 0;
+        return this;
+    }
+
+    method void dispose() {
+        do copter.dispose();
+        do obstacle.dispose();
+        do Memory.deAlloc(this);
+        return;
+    }
+
+    method void run() {
+        var char key;
+        var boolean exitGame; 
+        var boolean crashed;  
+        var int nextGap; 
+        var boolean restart;  
+
+        let exitGame = false;
+
+        // Main app loop
+        while (~exitGame) {
+            
+            // Init game vars
+            let crashed = false;
+            let score = 0;
+            let nextGap = 50;
+            let key = 0;
+            
+            // Reset positions
+            do copter.reset(50, 100);
+            do obstacle.reset(480, 50);
+
+            // Start screen
+            do Screen.clearScreen();
+            do Output.moveCursor(10, 26);
+            do Output.printString("CAVE COPTER");
+            do Output.moveCursor(12, 21);
+            do Output.printString("Press SPACE to start");
+            
+            // Wait for start
+            while (~(key = 32)) { 
+                 let key = Keyboard.keyPressed();
+                 if (key = 81) { let exitGame = true; let key = 32; } // Quit if Q pressed
+                 do Sys.wait(10);
+            }
+            
+            if (~exitGame) {
+                do Screen.clearScreen();
+            }
+
+            // Gameplay loop
+            while (~crashed & ~exitGame) {
+                do obstacle.move();
+                
+                // Recycle obstacle if it left screen
+                if (obstacle.getX() < 5) {
+                    let score = score + 1; 
+                    
+                    // Randomize gap slightly
+                    let nextGap = nextGap + 40;
+                    if (nextGap > 130) { let nextGap = 20; }
+                    
+                    do obstacle.reset(480, nextGap);
+                }
+
+                // Check collisions
+                if (obstacle.checkCrash(copter.getX(), copter.getY(), 25)) { let crashed = true; }
+                if ((copter.getY() + 30) > 250) { let crashed = true; } 
+                if (copter.getY() < 12)         { let crashed = true; }
+
+                // Input
+                let key = Keyboard.keyPressed();
+                if (key = 81) { let exitGame = true; } // q
+                
+                if (key = 32) { do copter.flyUp(); }
+                else { do copter.fall(); }
+
+                do Sys.wait(20);
+            }
+
+            // Game over screen
+            if (crashed) {
+                do Screen.clearScreen();
+                do Output.moveCursor(10, 27);
+                do Output.printString("GAME OVER!");
+                do Output.moveCursor(12, 27);
+                do Output.printString("Score: ");
+                do Output.printInt(score);
+                
+                do Output.moveCursor(16, 20);
+                do Output.printString("Press 'R' to Restart");
+                do Output.moveCursor(17, 20);
+                do Output.printString("Press 'Q' to Quit");
+
+                // Wait for restart or quit
+                let restart = false;
+                while (~restart & ~exitGame) {
+                    let key = Keyboard.keyPressed();
+                    if (key = 82) { let restart = true; } // R
+                    if (key = 81) { let exitGame = true; } // Q
+                }
+            }
+        }
+        return;
+    }
+}

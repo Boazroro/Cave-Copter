@@ -1,0 +1,79 @@
+class Copter {
+    field int x, y;
+    field int size; 
+
+    // Setup a new copter
+    constructor Copter new(int startX, int startY, int s) {
+        let x = startX;
+        let y = startY;
+        let size = 30; 
+        do draw();
+        return this;
+    }
+
+    method void dispose() {
+        do Memory.deAlloc(this);
+        return;
+    }
+
+    // Draw the helicopter using simple shapes
+    method void draw() {
+        do Screen.setColor(true); 
+        
+        // Draw body
+        do Screen.drawRectangle(x + 5, y + 10, x + 25, y + 20);
+        
+        // Draw tail
+        do Screen.drawRectangle(x, y + 12, x + 5, y + 15);
+        do Screen.drawRectangle(x, y + 10, x + 2, y + 12); 
+        
+        // Main rotor
+        do Screen.drawRectangle(x + 10, y + 5, x + 20, y + 10); 
+        do Screen.drawRectangle(x + 2, y + 5, x + 28, y + 7);   
+        
+        // Landing gear
+        do Screen.drawLine(x + 8, y + 20, x + 5, y + 25);  
+        do Screen.drawLine(x + 22, y + 20, x + 25, y + 25); 
+        do Screen.drawLine(x + 5, y + 25, x + 25, y + 25);  
+        return;
+    }
+
+    method void erase() {
+        do Screen.setColor(false); 
+        // Clear the area
+        do Screen.drawRectangle(x, y, x + 30, y + 30);
+        return;
+    }
+
+    // Move up
+    method void flyUp() {
+        if (y > 10) {
+            do erase();
+            let y = y - 10; 
+            do draw();
+        }
+        return;
+    }
+
+    // Gravity effect
+    method void fall() {
+        if ((y + 30) < 254) { 
+            do erase();
+            let y = y + 2; 
+            do draw();
+        }
+        return;
+    }
+    
+    // Reset position for new game
+    method void reset(int startX, int startY) {
+        do erase();
+        let x = startX;
+        let y = startY;
+        do draw();
+        return;
+    }
+
+    method int getX() { return x; }
+    method int getY() { return y; }
+}

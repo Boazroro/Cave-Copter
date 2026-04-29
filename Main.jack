@@ -1,0 +1,10 @@
+// Entry point for the game
+class Main {
+    function void main() {
+        var CopterGame game;
+        let game = CopterGame.new();
+        do game.run();
+        do game.dispose();
+        return;
+    }
+}

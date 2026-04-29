@@ -1,0 +1,70 @@
+class Obstacle {
+    field int x;
+    field int gapTop;      // Top of the gap
+    field int gapSize;     // How big the gap is
+    field int width;       
+
+    constructor Obstacle new(int startX, int startGapTop) {
+        let x = startX;
+        let gapTop = startGapTop;
+        let gapSize = 100; // Easy start
+        let width = 30;
+        do draw();
+        return this;
+    }
+
+    method void dispose() {
+        do Memory.deAlloc(this);
+        return;
+    }
+
+    method void draw() {
+        do Screen.setColor(true);
+        // Top pipe
+        do Screen.drawRectangle(x, 0, x + width, gapTop);
+        // Bottom pipe
+        do Screen.drawRectangle(x, gapTop + gapSize, x + width, 254);
+        return;
+    }
+
+    method void erase() {
+        do Screen.setColor(false);
+        do Screen.drawRectangle(x, 0, x + width, gapTop);
+        do Screen.drawRectangle(x, gapTop + gapSize, x + width, 254);
+        return;
+    }
+
+    method void move() {
+        if (x > 2) {
+            do erase();
+            let x = x - 5; // Speed
+            do draw();
+        }
+        return;
+    }
+
+    method int getX() { return x; }
+
+    // Recycle pipe with new height
+    method void reset(int newX, int newGapTop) {
+        do erase();
+        let x = newX;
+        let gapTop = newGapTop;
+        do draw();
+        return;
+    }
+
+    // Simple collision detection
+    method boolean checkCrash(int copterX, int copterY, int copterSize) {
+        // 1. Are we inside the pipe horizontally?
+        if ((copterX + copterSize) > x) {
+            if (copterX < (x + width)) {
+                
+                // 2. Did we hit top or bottom?
+                if (copterY < gapTop) { return true; }
+                if ((copterY + copterSize) > (gapTop + gapSize)) { return true; }
+            }
+        }
+        return false;
+    }
+}
